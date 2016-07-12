@@ -6,6 +6,7 @@ var gulp = require('gulp'),
 	connect = require('gulp-connect'),
 	gulpif = require('gulp-if'),
 	uglify = require('gulp-uglify'),
+	minifyHTML = require('gulp-minify-html'),
 	concat = require('gulp-concat');
 
 var env,
@@ -17,13 +18,13 @@ var env,
 	outputDir,
 	sassStyle;
 
-env = 'development'/*process.env.NODE_ENV || 'development'*/;
+env = 'production'/*process.env.NODE_ENV || 'production'*/;
 gutil.log(env);
 if(env === 'development') {
-	outputDir = 'builds/development';
+	outputDir = 'builds/development/';
 	sassStyle = 'expanded';
 } else {
-	outputDir = 'builds/production';
+	outputDir = 'builds/production/';
 	sassStyle = 'compressed';	
 }
 
@@ -35,8 +36,8 @@ jsSources = [
 	'components/scripts/template.js'
 ];
 sassSources = ['components/sass/style.scss'];
-htmlSources = [outputDir + '/*.html'];
-jsonSources = [outputDir + '/js/*.json'];
+htmlSources = [outputDir + '*.html'];
+jsonSources = [outputDir + 'js/*.json'];
 
 gulp.task('coffee', function() {
 	gulp.src(coffeeSources)
@@ -50,7 +51,7 @@ gulp.task('js', function() {
 		.pipe(concat('script.js'))
 		.pipe(browserify())
 		.pipe(gulpif(env === 'production', uglify()))
-		.pipe(gulp.dest(outputDir + '/js'))
+		.pipe(gulp.dest(outputDir + 'js/'))
 		.pipe(connect.reload());
 });
 
@@ -58,11 +59,11 @@ gulp.task('compass', function() {
 	gulp.src(sassSources)
 		.pipe(compass({
 			sass: 'components/sass',
-			image: outputDir + '/images',
+			image: outputDir + 'images',
 			style: sassStyle
 		}))
 			.on('error', gutil.log)
-		.pipe(gulp.dest(outputDir + '/css'))
+		.pipe(gulp.dest(outputDir + 'css/'))
 		.pipe(connect.reload());
 });
 
@@ -70,7 +71,7 @@ gulp.task('watch', function() {
 	gulp.watch(coffeeSources, ['coffee']);
 	gulp.watch(jsSources, ['js']);
 	gulp.watch('components/sass/*.scss', ['compass']);
-	gulp.watch(htmlSources, ['html']);
+	gulp.watch('builds/development/*.html', ['html']);
 	gulp.watch(jsonSources, ['html']);
 });
 
@@ -82,7 +83,9 @@ gulp.task('connect', function() {
 });
 
 gulp.task('html', function() {
-	gulp.src(htmlSources)
+	gulp.src('builds/development/*.html')
+		.pipe(gulpif(env === 'production', minifyHTML()))
+		.pipe(gulpif(env === 'production', gulp.dest(outputDir)))	
 		.pipe(connect.reload());
 });
 
