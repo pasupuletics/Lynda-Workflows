@@ -1,0 +1,11 @@
+{
+  "name": "workflows",
+  "version": "0.0.1",
+  "description": "learning lynda workflow project",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "?.git"
+  },
+  "author": "Chandrasekhar Pasupuleti"
+}
